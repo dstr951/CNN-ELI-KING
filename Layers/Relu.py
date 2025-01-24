@@ -1,3 +1,8 @@
+import numpy as np
+
+from Layers.Layer import Layer
+
+
 class ReLU(Layer):
     def forward(self, input):
         """

@@ -6,6 +6,8 @@ from Layers.CNN import Conv2D
 from Layers.FC import FullyConnected
 from Layers.Flatten import Flatten
 from Layers.MaxPulling import MaxPooling2D
+from Layers.Relu import ReLU
+from Layers.Softmax import Softmax
 from Model import Model
 import Visualizations
 import numpy as np
@@ -95,16 +97,26 @@ def main():
                kernel_size=Consts.CONV_2D_KERNEL, stride=Consts.CONV_2D_STRIDE, padding=Consts.CONV_2D_PADDING),  # Convolution
         BatchNormalization(num_features=Consts.CONV_2D_OUTPUT_CHANNELS),  # Batch Normalization
         MaxPooling2D(pool_size=2, stride=2),  # Max Pooling
+        ReLU(),
         Flatten(),  # Flatten the output
         #FullyConnected(input_size=14 * 14 * 8, output_size=128),  # Fully Connected Layer
         FullyConnected(input_tuple=(Consts.BATCH_SIZE, flatten_out_dims), output_size=(Consts.BATCH_SIZE, Consts.NUM_NUIRONS)),  # Fully Connected Layer
-        FullyConnected(input_tuple=(Consts.BATCH_SIZE,Consts.NUM_NUIRONS), output_size=(Consts.BATCH_SIZE,Consts.NUM_CLASIFICATION_NUIRONS))  # Output Layer (e.g., 10 classes for classification)
+        FullyConnected(input_tuple=(Consts.BATCH_SIZE,Consts.NUM_NUIRONS), output_size=(Consts.BATCH_SIZE,Consts.NUM_CLASIFICATION_NUIRONS)),  # Output Layer (e.g., 10 classes for classification)
+        Softmax()
     ])
     trained_model = Train.train(model)
     X_validation, Y_validation = Utils.read_labeled_file(Consts.VALIDATION_PATH)
     # reshape for 32 rows, 32 columns, 3 channels RGB
     X_validation = np.reshape(X_validation, (1000, 32, 32, 3))
-    Y_pred = trained_model.forward(X_validation)
+    Y_pred = np.argmax(trained_model.forward(X_validation), axis=1) + 1
+    class_accuracies = []
+    for cls in range(1,11):
+        cls_indices = Y_validation == cls
+        cls_correct = np.sum(Y_validation[cls_indices] == Y_pred[cls_indices])
+        cls_total = np.sum(cls_indices)
+        accuracy = cls_correct / cls_total if cls_total > 0 else 0
+        class_accuracies.append(accuracy)
+    print(class_accuracies)
     #Visualizations.generate_visualizations(Y_validation, Y_pred)
 
 
