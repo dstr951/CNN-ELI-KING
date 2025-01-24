@@ -31,12 +31,9 @@ def create_mini_batches(X, Y, batch_size, seed=Consts.SEED):
     """
     n_samples = X.shape[0]
 
-    # Initialize random number generator
-    rng = np.random.default_rng(seed)
-
     # Shuffle the data
     indices = np.arange(n_samples)
-    rng.shuffle(indices)
+    np.random.shuffle(indices)
     X = X[indices]
     Y = Y[indices]
 

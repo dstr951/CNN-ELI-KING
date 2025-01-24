@@ -11,6 +11,8 @@ from Layers.Softmax import Softmax
 from Model import Model
 import Visualizations
 import numpy as np
+# Set a seed for reproducibility
+np.random.seed(42)
 
 def cnn_dims(h, w, k, p, s, c_in, c_out):
     """
