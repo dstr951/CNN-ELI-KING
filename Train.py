@@ -7,7 +7,7 @@ import Consts
 import Utils
 
 def preprocess_data() -> List[Tuple[np.array, np.array]]:
-    X, Y = Utils.read_test_file(Consts.TRAIN_PATH)
+    X, Y = Utils.read_labeled_file(Consts.TRAIN_PATH)
     # reshape for 32 rows, 32 columns, 3 channels RGB
     X = np.reshape(X, (8000, 32, 32, 3))
     # TODO - add minmax normalization to data
@@ -51,10 +51,68 @@ def create_mini_batches(X, Y, batch_size, seed=Consts.SEED):
 def train(model: Model):
     batches = preprocess_data()
     for epoch in range(Consts.NUM_EPOCHS):
+        train_loss = 0.0
         for batch in batches:
             X_batch = batch[0]
             Y_batch = batch[1]
-            model.forward(X_batch)
+            Y_batch = Y_batch.astype(int)
+            Y_BATCH_ONE_HOT = np.eye(10)[Y_batch - 1]
+            predictions = model.forward(X_batch)
+            # Compute loss
+            loss = loss_fn(predictions, Y_BATCH_ONE_HOT)
+            train_loss += loss
+
+            # Compute gradient of loss with respect to predictions
+            loss_grad = compute_loss_gradient(predictions, Y_BATCH_ONE_HOT)
+            model.backward(loss_grad)
+
+            # Update model parameters
+            model.update_params(Consts.LEARNING_RATE)
+
+
         print(f"finished epoch: {epoch}")
     return model
 
+
+def loss_fn(predictions, Y_batch):
+    return categorical_cross_entropy(predictions, Y_batch)
+
+
+def categorical_cross_entropy(predictions, targets):
+    """
+    Computes the Categorical Cross-Entropy Loss.
+
+    Args:
+        predictions (np.ndarray): Softmax output of shape (N, C), where N is the batch size,
+                                   and C is the number of classes. Each row should sum to 1.
+        targets (np.ndarray): One-hot encoded ground truth of shape (N, C).
+
+    Returns:
+        float: Average cross-entropy loss over the batch.
+    """
+    # Avoid log(0) by adding a small epsilon
+    epsilon = 1e-12
+    predictions = np.clip(predictions, epsilon, 1. - epsilon)
+
+    # Compute the loss
+    loss = -np.sum(targets * np.log(predictions)) / targets.shape[0]
+    return loss
+
+
+def compute_loss_gradient(predictions, targets):
+    """
+    Computes the gradient of the Categorical Cross-Entropy Loss with respect to predictions.
+
+    Args:
+        predictions (np.ndarray): Softmax probabilities of shape (N, C), where N is the batch size
+                                   and C is the number of classes.
+        targets (np.ndarray): One-hot encoded ground truth of shape (N, C).
+
+    Returns:
+        np.ndarray: Gradient of the loss with respect to predictions, of shape (N, C).
+    """
+    # Ensure shapes match
+    assert predictions.shape == targets.shape, "Shapes of predictions and targets must match."
+
+    # Gradient is simply (predictions - targets)
+    return np.average(predictions - targets, axis=0)

@@ -18,12 +18,12 @@ class Conv2D(Layer):
 
     def forward(self, input):
        # self.input = np.pad(input, ((self.padding, self.padding), (self.padding, self.padding)), mode='constant')
-        _, self.input_height, self.input_width, _ = input.shape
+        batch_size, self.input_height, self.input_width, c_in = input.shape
 
         # Calculate output dimensions
         self.output_height = (self.input_height - self.kernel_size) // self.stride + 1
         self.output_width = (self.input_width - self.kernel_size) // self.stride + 1
-        self.output = np.zeros((self.output_height, self.output_width, self.output_channels))
+        self.output = np.zeros((batch_size,self.output_height, self.output_width, self.output_channels))
 
         # Perform convolution
         for h in range(self.output_height):
@@ -34,8 +34,8 @@ class Conv2D(Layer):
                     h_end = h_start + self.kernel_size
                     w_end = w_start + self.kernel_size
 
-                    patch = input[:, h_start:h_end, w_start:w_end, :]
-                    self.output[h, w, c] = np.sum(patch * self.weights[..., c]) + (self.biases[c] if self.use_bias else 0)
+                    patch = input[:, h_start:h_end, w_start:w_end]
+                    self.output[:,h, w, c] = np.sum(patch * self.weights[..., c], axis=(1,2,3)) + (self.biases[c] if self.use_bias else 0)
 
         return self.output
 
