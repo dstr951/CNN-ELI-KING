@@ -1,9 +1,0 @@
-TRAIN_PATH = "data/train.csv"
-VALIDATION_PATH = "data/validate.csv"
-RESULT_PATH = ""
-RESULT_NAME = ""
-SEED = 42
-TRAIN_NUM = 0
-BATCH_SIZE = 200
-NUM_EPOCHS = 1
-LEARNING_RATE = 0.001
