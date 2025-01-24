@@ -105,7 +105,7 @@ def main():
     # reshape for 32 rows, 32 columns, 3 channels RGB
     X_validation = np.reshape(X_validation, (1000, 32, 32, 3))
     Y_pred = trained_model.forward(X_validation)
-    Visualizations.generate_visualizations(Y_validation, Y_pred)
+    #Visualizations.generate_visualizations(Y_validation, Y_pred)
 
 
 
