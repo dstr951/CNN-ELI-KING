@@ -39,8 +39,9 @@ class MaxPooling2D(Layer):
                     h_end = h_start + self.pool_size
                     w_end = w_start + self.pool_size
 
-                    patch = self.input[h_start:h_end, w_start:w_end, c]
-                    max_value = np.max(patch)
-                    grad_input[h_start:h_end, w_start:w_end, c] += (patch == max_value) * grad_output[h, w, c]
+                    patch = self.input[:, h_start:h_end, w_start:w_end, c]
+                    max_value = np.max(patch, axis=(1,2))
+                    max_value = max_value[:, np.newaxis, np.newaxis]
+                    grad_input[:, h_start:h_end, w_start:w_end, c] += (patch == max_value) * grad_output[:, h:h+1, w:w+1, c]
 
         return grad_input

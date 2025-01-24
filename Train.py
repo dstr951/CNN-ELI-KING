@@ -115,4 +115,4 @@ def compute_loss_gradient(predictions, targets):
     assert predictions.shape == targets.shape, "Shapes of predictions and targets must match."
 
     # Gradient is simply (predictions - targets)
-    return np.average(predictions - targets, axis=0)
+    return predictions - targets

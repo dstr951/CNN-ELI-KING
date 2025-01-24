@@ -17,8 +17,9 @@ class Conv2D(Layer):
         self.biases = np.zeros(output_channels) if use_bias else None
 
     def forward(self, input):
-       # self.input = np.pad(input, ((self.padding, self.padding), (self.padding, self.padding)), mode='constant')
-        batch_size, self.input_height, self.input_width, c_in = input.shape
+        self.input = np.pad(input, ((0, 0), (self.padding, self.padding),
+                                    (self.padding, self.padding), (0, 0)), mode='constant')
+        batch_size, self.input_height, self.input_width, c_in = self.input.shape
 
         # Calculate output dimensions
         self.output_height = (self.input_height - self.kernel_size) // self.stride + 1
@@ -34,7 +35,7 @@ class Conv2D(Layer):
                     h_end = h_start + self.kernel_size
                     w_end = w_start + self.kernel_size
 
-                    patch = input[:, h_start:h_end, w_start:w_end]
+                    patch = self.input[:, h_start:h_end, w_start:w_end]
                     self.output[:,h, w, c] = np.sum(patch * self.weights[..., c], axis=(1,2,3)) + (self.biases[c] if self.use_bias else 0)
 
         return self.output
@@ -54,8 +55,8 @@ class Conv2D(Layer):
                     h_end = h_start + self.kernel_size
                     w_end = w_start + self.kernel_size
 
-                    patch = self.input[h_start:h_end, w_start:w_end, :]
-                    self.grad_weights[..., c] += patch * grad_output[h, w, c]
+                    patch = self.input[:,h_start:h_end, w_start:w_end, c]
+                    self.grad_weights[..., c] += patch * grad_output[:,  h:h+1, w:w+1, c]
                     if self.use_bias:
                         self.grad_biases[c] += grad_output[h, w, c]
                     grad_input[h_start:h_end, w_start:w_end, :] += self.weights[..., c] * grad_output[h, w, c]
