@@ -6,15 +6,19 @@ import Model
 import Consts
 import Utils
 
+
 def preprocess_data() -> List[Tuple[np.array, np.array]]:
     X, Y = Utils.read_labeled_file(Consts.TRAIN_PATH)
+    X_validate, Y_validate = Utils.read_labeled_file(Consts.VALIDATION_PATH)
     # reshape for 32 rows, 32 columns, 3 channels RGB
-    X = np.reshape(X, (8000, 32, 32, 3))
+    X = np.reshape(X, (X.shape[0], 32, 32, 3))
+    X_validate = np.reshape(X_validate, (X_validate.shape[0], 32, 32, 3,))
     # TODO - add minmax normalization to data
 
-    return create_mini_batches(X, Y, Consts.BATCH_SIZE)
+    return create_mini_batches(X, Y, Consts.BATCH_SIZE), X_validate, Y_validate
 
-def shuffle_data(X,Y):
+
+def shuffle_data(X, Y):
     n_samples = X.shape[0]
 
     # Shuffle the data
@@ -22,7 +26,8 @@ def shuffle_data(X,Y):
     np.random.shuffle(indices)
     X = X[indices]
     Y = Y[indices]
-    return X,Y
+    return X, Y
+
 
 # Function to create mini-batches with a random seed
 def create_mini_batches(X, Y, batch_size, seed=Consts.SEED):
@@ -54,13 +59,14 @@ def create_mini_batches(X, Y, batch_size, seed=Consts.SEED):
 
     return mini_batches
 
+
 def train(model: Model):
-    batches = preprocess_data()
+    batches,  X_validate, Y_validate = preprocess_data()
     for epoch in range(Consts.NUM_EPOCHS):
         train_loss = 0.0
         correct_predictions = 0
         total_samples = 0
-        
+
         print(f"Epoch {epoch + 1}/{Consts.NUM_EPOCHS}")
 
         for batch_idx, batch in enumerate(batches):
@@ -91,13 +97,21 @@ def train(model: Model):
             print(f"\tBatch {batch_idx + 1}/{len(batches)} - Loss: {loss:.4f}")
 
         # Print epoch accuracy and loss
+
+
+        predictions = model.forward(X_validate)
+        validation_predictions = np.argmax(predictions, axis=1) + 1
+        correct_predictions += np.sum(validation_predictions == Y_validate)
+        total_samples = Y_validate.shape[0]
         epoch_accuracy = correct_predictions / total_samples
         print(f"Epoch {epoch + 1} completed. Loss: {train_loss / len(batches):.4f}, Accuracy: {epoch_accuracy:.4f}")
 
-    return model
+    return model, X_validate, Y_validate
+
 
 def loss_fn(predictions, Y_batch):
     return categorical_cross_entropy(predictions, Y_batch)
+
 
 def categorical_cross_entropy(predictions, targets):
     """
@@ -118,6 +132,7 @@ def categorical_cross_entropy(predictions, targets):
     # Compute the loss
     loss = -np.sum(targets * np.log(predictions)) / targets.shape[0]
     return loss
+
 
 def compute_loss_gradient(predictions, targets):
     """
