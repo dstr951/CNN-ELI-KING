@@ -1,3 +1,4 @@
+import copy
 from typing import List, Tuple
 
 import numpy as np
@@ -136,6 +137,7 @@ def create_mini_batches(X, Y, batch_size, seed=Consts.SEED):
 
 def train(model: Model):
     batches,  X_validate, Y_validate = preprocess_data()
+    max_epoch_accuracy = -1
     for epoch in range(Consts.NUM_EPOCHS):
         train_loss = 0.0
         correct_predictions = 0
@@ -180,8 +182,11 @@ def train(model: Model):
         total_samples = Y_validate.shape[0]
         epoch_accuracy = correct_predictions / total_samples
         print(f"Epoch {epoch + 1} completed. Loss: {train_loss / len(batches):.4f}, validation Accuracy: {epoch_accuracy:.4f} train Accuracy: {train_accuracy:.4f}")
-
-    return model, X_validate, Y_validate
+        if max_epoch_accuracy < epoch_accuracy:
+            max_epoch_accuracy = epoch_accuracy
+            max_model = copy.deepcopy(model)
+    print("returning model with accuracy: " + max_epoch_accuracy)
+    return max_model, X_validate, Y_validate
 
 
 def loss_fn(predictions, Y_batch):
