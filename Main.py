@@ -119,7 +119,7 @@ def main():
         accuracy = cls_correct / cls_total if cls_total > 0 else 0
         class_accuracies.append(accuracy)
     print(class_accuracies)
-    #Visualizations.generate_visualizations(Y_validation, Y_pred)
+    Visualizations.generate_visualizations(Y_validation, Y_pred)
 
 
 
