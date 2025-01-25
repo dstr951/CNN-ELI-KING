@@ -6,13 +6,24 @@ import Model
 import Consts
 import Utils
 
+
+def min_max_norm(X):
+    min_values = np.min(X, axis = 0)
+    max_values = np.max(X, axis = 0)
+    EPSILON = 1e-8
+    return (X - min_values) / (max_values - min_values + EPSILON)
+
+
 def preprocess_data() -> List[Tuple[np.array, np.array]]:
-    X, Y = Utils.read_labeled_file(Consts.TRAIN_PATH)
+    X, Y = Utils.read_labeled_file(Consts.TRAIN_PATH_CFAR)
+    X = min_max_norm(X)
+    X_train, Y_train = X[:24000], Y[:24000]
+    X_validate, Y_valdiate = X[49000:], Y[49000:]
     # reshape for 32 rows, 32 columns, 3 channels RGB
-    X = np.reshape(X, (8000, 32, 32, 3))
+    X_train = np.reshape(X_train, (24000, 32, 32, 3))
     # TODO - add minmax normalization to data
 
-    return create_mini_batches(X, Y, Consts.BATCH_SIZE)
+    return create_mini_batches(X_train, Y_train, Consts.BATCH_SIZE), X_validate, Y_valdiate
 
 
 # Function to create mini-batches with a random seed
@@ -46,7 +57,7 @@ def create_mini_batches(X, Y, batch_size, seed=Consts.SEED):
     return mini_batches
 
 def train(model: Model):
-    batches = preprocess_data()
+    batches, X_validate, Y_valdiate = preprocess_data()
     for epoch in range(Consts.NUM_EPOCHS):
         train_loss = 0.0
         correct_predictions = 0
@@ -85,7 +96,7 @@ def train(model: Model):
         epoch_accuracy = correct_predictions / total_samples
         print(f"Epoch {epoch + 1} completed. Loss: {train_loss / len(batches):.4f}, Accuracy: {epoch_accuracy:.4f}")
 
-    return model
+    return model, X_validate, Y_valdiate
 
 def loss_fn(predictions, Y_batch):
     return categorical_cross_entropy(predictions, Y_batch)

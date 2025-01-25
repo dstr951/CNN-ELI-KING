@@ -141,8 +141,8 @@ def main():
         FullyConnected(input_tuple=(Consts.BATCH_SIZE,250), output_size=(Consts.BATCH_SIZE, 10)),
         Softmax()
     ])
-    trained_model = Train.train(model)
-    X_validation, Y_validation = Utils.read_labeled_file(Consts.VALIDATION_PATH)
+    trained_model, X_validation, Y_validation = Train.train(model)
+    #X_validation, Y_validation = Utils.read_labeled_file(Consts.VALIDATION_PATH)
     # reshape for 32 rows, 32 columns, 3 channels RGB
     X_validation = np.reshape(X_validation, (1000, 32, 32, 3))
     Y_pred = np.argmax(trained_model.forward(X_validation), axis=1) + 1

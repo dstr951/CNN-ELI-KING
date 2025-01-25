@@ -3,12 +3,13 @@ PICTURE_WIDTH = 32
 PICTURE_HEIGHT = 32
 TRAIN_PATH = "data/train.csv"
 VALIDATION_PATH = "data/validate.csv"
+TRAIN_PATH_CFAR = "data/train_cfar-10.csv"
 RESULT_PATH = ""
 RESULT_NAME = ""
 SEED = 42
 TRAIN_NUM = 0
 BATCH_SIZE = 50
-NUM_EPOCHS = 10
+NUM_EPOCHS = 2
 LEARNING_RATE = 0.001
 
 #Optimizer params
