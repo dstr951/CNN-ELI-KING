@@ -6,16 +6,90 @@ import Model
 import Consts
 import Utils
 
+import numpy as np
+
+def rotate_image_numpy(image, angle):
+    """
+    Rotates an image by a specified angle using only NumPy.
+
+    Args:
+        image (np.ndarray): The input image of shape (height, width, channels).
+        angle (float): The angle (in degrees) to rotate the image.
+
+    Returns:
+        np.ndarray: The rotated image of the same shape as the input.
+    """
+    height, width, channels = image.shape
+    center_x, center_y = width // 2, height // 2  # Calculate the center of the image
+
+    # Create the rotation matrix
+    rad_angle = np.deg2rad(angle)
+    cos_theta = np.cos(rad_angle)
+    sin_theta = np.sin(rad_angle)
+    rotation_matrix = np.array([[cos_theta, -sin_theta], [sin_theta, cos_theta]])
+
+    # Create an output image
+    rotated_image = np.zeros_like(image)
+
+    # Iterate through each pixel in the output image
+    for y in range(height):
+        for x in range(width):
+            # Map the pixel in the rotated image back to the original image
+            original_coords = np.array([x - center_x, y - center_y])
+            new_coords = np.dot(rotation_matrix, original_coords)
+            new_x, new_y = new_coords + np.array([center_x, center_y])
+
+            # Check if the coordinates are within bounds
+            if 0 <= new_x < width and 0 <= new_y < height:
+                # Assign pixel value from the original image to the rotated image
+                rotated_image[y, x] = image[int(new_y), int(new_x)]
+
+    return rotated_image
+
+
+def augment_with_rotation_numpy(X, max_angle=5):
+    """
+    Augments the dataset by rotating each image by a random degree between -max_angle and max_angle.
+
+    Args:
+        X (np.ndarray): Original dataset of images, shape (n_samples, height, width, channels).
+        max_angle (int): Maximum absolute angle to rotate the images.
+
+    Returns:
+        np.ndarray: Augmented dataset with rotated images, same shape as input.
+    """
+    augmented_X = np.zeros_like(X)
+
+    for i in range(X.shape[0]):
+        angle = np.random.uniform(-max_angle, max_angle)  # Random angle between -max_angle and max_angle
+        augmented_X[i] = rotate_image_numpy(X[i], angle)
+
+    return augmented_X
+
+
 
 def preprocess_data() -> List[Tuple[np.array, np.array]]:
     X, Y = Utils.read_labeled_file(Consts.TRAIN_PATH)
     X_validate, Y_validate = Utils.read_labeled_file(Consts.VALIDATION_PATH)
-    # reshape for 32 rows, 32 columns, 3 channels RGB
+    # Reshape for 32 rows, 32 columns, 3 channels RGB
     X = np.reshape(X, (X.shape[0], 32, 32, 3))
-    X_validate = np.reshape(X_validate, (X_validate.shape[0], 32, 32, 3,))
-    # TODO - add minmax normalization to data
+    X_validate = np.reshape(X_validate, (X_validate.shape[0], 32, 32, 3))
 
-    return create_mini_batches(X, Y, Consts.BATCH_SIZE), X_validate, Y_validate
+    X_combined = X
+    Y_combined = Y
+    for i in range(2):
+        # Apply data augmentation with rotation using NumPy
+        X_augmented = augment_with_rotation_numpy(X)
+
+        # Combine the original and augmented datasets
+        X_combined = np.concatenate([X_combined, X_augmented], axis=0)
+        Y_combined = np.concatenate([Y_combined, Y], axis=0)  # Duplicate labels for augmented images
+
+    # Shuffle the combined dataset
+    X_combined, Y_combined = shuffle_data(X_combined, Y_combined)
+
+    return create_mini_batches(X_combined, Y_combined, Consts.BATCH_SIZE), X_validate, Y_validate
+
 
 
 def shuffle_data(X, Y):
