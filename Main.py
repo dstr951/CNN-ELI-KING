@@ -102,8 +102,8 @@ def main():
         ReLU(),
         Flatten(),  # Flatten the output
         #FullyConnected(input_size=14 * 14 * 8, output_size=128),  # Fully Connected Layer
-        FullyConnected(input_tuple=(flatten_out_dims,), output_size=(Consts.NUM_NUIRONS,)),  # Fully Connected Layer
-        FullyConnected(input_tuple=(Consts.NUM_NUIRONS,), output_size=(Consts.NUM_CLASIFICATION_NUIRONS,)),  # Output Layer (e.g., 10 classes for classification)
+        FullyConnected(input_tuple=(Consts.BATCH_SIZE, flatten_out_dims), output_size=(Consts.BATCH_SIZE, Consts.NUM_NUIRONS)),  # Fully Connected Layer
+        FullyConnected(input_tuple=(Consts.BATCH_SIZE,Consts.NUM_NUIRONS), output_size=(Consts.BATCH_SIZE,Consts.NUM_CLASIFICATION_NUIRONS)),  # Output Layer (e.g., 10 classes for classification)
         Softmax()
     ])
     trained_model = Train.train(model)
@@ -119,7 +119,7 @@ def main():
         accuracy = cls_correct / cls_total if cls_total > 0 else 0
         class_accuracies.append(accuracy)
     print(class_accuracies)
-    Visualizations.generate_visualizations(Y_validation, Y_pred)
+    #Visualizations.generate_visualizations(Y_validation, Y_pred)
 
 
 

@@ -10,8 +10,8 @@ class FullyConnected(Layer):
         self.use_bias = use_bias
 
         # Initialize weights and biases
-        self.weights = np.random.randn(input_tuple[0] , output_size[0]) * 0.01
-        self.biases = np.zeros(output_size[0]) if use_bias else None
+        self.weights = np.random.randn(input_tuple[1] , output_size[1]) * 0.01
+        self.biases = np.zeros(output_size[1]) if use_bias else None
 
     def forward(self, input):
         self.input = input
