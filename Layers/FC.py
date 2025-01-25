@@ -25,9 +25,7 @@ class FullyConnected(Layer):
         return self.output
 
     def backward(self, grad_output):
-        #TODO - I think we need to devide by Consts.BATCH_SIZE here
         self.grad_weights = np.dot(self.input.T, grad_output)
-        # TODO - I think we need to devide by Consts.BATCH_SIZE here
         self.grad_biases = np.sum(grad_output, axis=0) if self.use_bias else None
         grad_input = np.dot(grad_output, self.weights.T)
         return grad_input
