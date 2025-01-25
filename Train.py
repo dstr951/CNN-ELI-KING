@@ -94,7 +94,7 @@ def train(model: Model):
             total_samples += Y_batch.shape[0]
 
             # Print batch progress
-            if batch_idx % 10 == 9:
+            if batch_idx % 20 == 19:
                 print(f"\tBatch {batch_idx + 1}/{len(batches)} - Loss: {loss:.4f}")
 
         # Print epoch accuracy and loss
