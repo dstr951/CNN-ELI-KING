@@ -94,17 +94,17 @@ def train(model: Model):
             total_samples += Y_batch.shape[0]
 
             # Print batch progress
-            print(f"\tBatch {batch_idx + 1}/{len(batches)} - Loss: {loss:.4f}")
+            # print(f"\tBatch {batch_idx + 1}/{len(batches)} - Loss: {loss:.4f}")
 
         # Print epoch accuracy and loss
 
-
+        train_accuracy = correct_predictions / total_samples
         predictions = model.forward(X_validate)
         validation_predictions = np.argmax(predictions, axis=1) + 1
         correct_predictions = np.sum(validation_predictions == Y_validate)
         total_samples = Y_validate.shape[0]
         epoch_accuracy = correct_predictions / total_samples
-        print(f"Epoch {epoch + 1} completed. Loss: {train_loss / len(batches):.4f}, Accuracy: {epoch_accuracy:.4f}")
+        print(f"Epoch {epoch + 1} completed. Loss: {train_loss / len(batches):.4f}, validation Accuracy: {epoch_accuracy:.4f} train Accuracy: {train_accuracy:.4f}")
 
     return model, X_validate, Y_validate
 
