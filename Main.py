@@ -3,6 +3,7 @@ import Utils
 import Consts
 from Layers.BatchNorm import BatchNormalization
 from Layers.CNN import Conv2D
+from Layers.Dropout import Dropout
 from Layers.FC import FullyConnected
 from Layers.Flatten import Flatten
 from Layers.MaxPulling import MaxPooling2D
@@ -88,22 +89,56 @@ def fc_dims(dim_in, dim_out):
 
 
 def main():
-    cnn1_out_dims = cnn_dims(32,32,Consts.CONV_2D_KERNEL,Consts.CONV_2D_PADDING,Consts.CONV_2D_STRIDE,Consts.CONV_2D_INPUT_CHANNELS, Consts.CONV_2D_OUTPUT_CHANNELS)
-    max_poolling_out_dims = max_pooling_dims(*cnn1_out_dims,Consts.MAX_POOLING_POOL_SIZE, Consts.MAX_POOLING_STRIDE)
-    flatten_out_dims = flatten_dims(*max_poolling_out_dims)
+    cnn1_out_dims = cnn_dims(Consts.PICTURE_HEIGHT,Consts.PICTURE_WIDTH,
+                             Consts.CONV_2D_KERNEL,Consts.CONV_2D_PADDING,Consts.CONV_2D_STRIDE,Consts.CONV_2D_INPUT_CHANNELS, 50)
+    h1, w1, c1_out = cnn1_out_dims
+    cnn2_out_dims = cnn_dims(h1,w1,
+                             Consts.CONV_2D_KERNEL,Consts.CONV_2D_PADDING,Consts.CONV_2D_STRIDE,c1_out, 75)
+
+    max1_poolling_out_dims = max_pooling_dims(*cnn2_out_dims,Consts.MAX_POOLING_POOL_SIZE, Consts.MAX_POOLING_STRIDE)
+    h3,w3,c3_out = max1_poolling_out_dims
+    cnn3_out_dims = cnn_dims(h3, w3, Consts.CONV_2D_KERNEL,Consts.CONV_2D_PADDING,Consts.CONV_2D_STRIDE, c3_out,
+                             125)
+    max2_poolling_out_dims = max_pooling_dims(*cnn3_out_dims,Consts.MAX_POOLING_POOL_SIZE, Consts.MAX_POOLING_STRIDE)
+
+    flatten_out_dims = flatten_dims(*max2_poolling_out_dims)
 
 
     # Define the architecture
+    # model = Model([
+    #     Conv2D(input_channels=Consts.CONV_2D_INPUT_CHANNELS, output_channels=Consts.CONV_2D_OUTPUT_CHANNELS,
+    #            kernel_size=Consts.CONV_2D_KERNEL, stride=Consts.CONV_2D_STRIDE, padding=Consts.CONV_2D_PADDING),  # Convolution
+    #     BatchNormalization(num_features=Consts.CONV_2D_OUTPUT_CHANNELS),  # Batch Normalization
+    #     MaxPooling2D(pool_size=2, stride=2),  # Max Pooling
+    #     ReLU(),
+    #     Flatten(),  # Flatten the output
+    #     #FullyConnected(input_size=14 * 14 * 8, output_size=128),  # Fully Connected Layer
+    #     FullyConnected(input_tuple=(Consts.BATCH_SIZE, flatten_out_dims), output_size=(Consts.BATCH_SIZE, Consts.NUM_NUIRONS)),  # Fully Connected Layer
+    #     FullyConnected(input_tuple=(Consts.BATCH_SIZE,Consts.NUM_NUIRONS), output_size=(Consts.BATCH_SIZE,Consts.NUM_CLASIFICATION_NUIRONS)),  # Output Layer (e.g., 10 classes for classification)
+    #     Softmax()
+    # ])
     model = Model([
-        Conv2D(input_channels=Consts.CONV_2D_INPUT_CHANNELS, output_channels=Consts.CONV_2D_OUTPUT_CHANNELS,
-               kernel_size=Consts.CONV_2D_KERNEL, stride=Consts.CONV_2D_STRIDE, padding=Consts.CONV_2D_PADDING),  # Convolution
-        BatchNormalization(num_features=Consts.CONV_2D_OUTPUT_CHANNELS),  # Batch Normalization
-        MaxPooling2D(pool_size=2, stride=2),  # Max Pooling
+        Conv2D(input_channels=Consts.CONV_2D_INPUT_CHANNELS,output_channels=50,kernel_size=Consts.CONV_2D_KERNEL,
+               stride=Consts.CONV_2D_STRIDE,padding=Consts.CONV_2D_PADDING),
         ReLU(),
-        Flatten(),  # Flatten the output
-        #FullyConnected(input_size=14 * 14 * 8, output_size=128),  # Fully Connected Layer
-        FullyConnected(input_tuple=(Consts.BATCH_SIZE, flatten_out_dims), output_size=(Consts.BATCH_SIZE, Consts.NUM_NUIRONS)),  # Fully Connected Layer
-        FullyConnected(input_tuple=(Consts.BATCH_SIZE,Consts.NUM_NUIRONS), output_size=(Consts.BATCH_SIZE,Consts.NUM_CLASIFICATION_NUIRONS)),  # Output Layer (e.g., 10 classes for classification)
+        Conv2D(input_channels=50, output_channels=75, kernel_size=Consts.CONV_2D_KERNEL,
+               stride=Consts.CONV_2D_STRIDE, padding=Consts.CONV_2D_PADDING),
+        ReLU(),
+        MaxPooling2D(pool_size=Consts.MAX_POOLING_POOL_SIZE, stride=Consts.MAX_POOLING_STRIDE),
+        Dropout(0.25),
+        Conv2D(input_channels=75, output_channels=125,kernel_size=Consts.CONV_2D_KERNEL,stride=Consts.CONV_2D_STRIDE,
+               padding=Consts.CONV_2D_PADDING),
+        ReLU(),
+        MaxPooling2D(pool_size=Consts.MAX_POOLING_POOL_SIZE, stride=Consts.MAX_POOLING_STRIDE),
+        Dropout(0.25),
+        Flatten(),
+        FullyConnected(input_tuple=(Consts.BATCH_SIZE,flatten_out_dims),output_size=(Consts.BATCH_SIZE, 500)),
+        ReLU(),
+        Dropout(0.4),
+        FullyConnected(input_tuple=(Consts.BATCH_SIZE, 500), output_size=(Consts.BATCH_SIZE, 250)),
+        ReLU(),
+        Dropout(0.3),
+        FullyConnected(input_tuple=(Consts.BATCH_SIZE,250), output_size=(Consts.BATCH_SIZE, 10)),
         Softmax()
     ])
     trained_model = Train.train(model)
