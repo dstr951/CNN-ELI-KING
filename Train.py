@@ -14,6 +14,15 @@ def preprocess_data() -> List[Tuple[np.array, np.array]]:
 
     return create_mini_batches(X, Y, Consts.BATCH_SIZE)
 
+def shuffle_data(X,Y):
+    n_samples = X.shape[0]
+
+    # Shuffle the data
+    indices = np.arange(n_samples)
+    np.random.shuffle(indices)
+    X = X[indices]
+    Y = Y[indices]
+    return X,Y
 
 # Function to create mini-batches with a random seed
 def create_mini_batches(X, Y, batch_size, seed=Consts.SEED):
