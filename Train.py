@@ -49,12 +49,19 @@ def train(model: Model):
     batches = preprocess_data()
     for epoch in range(Consts.NUM_EPOCHS):
         train_loss = 0.0
-        for batch in batches:
+        correct_predictions = 0
+        total_samples = 0
+        
+        print(f"Epoch {epoch + 1}/{Consts.NUM_EPOCHS}")
+
+        for batch_idx, batch in enumerate(batches):
             X_batch = batch[0]
             Y_batch = batch[1]
             Y_batch = Y_batch.astype(int)
             Y_BATCH_ONE_HOT = np.eye(10)[Y_batch - 1]
+
             predictions = model.forward(X_batch)
+
             # Compute loss
             loss = loss_fn(predictions, Y_BATCH_ONE_HOT)
             train_loss += loss
@@ -66,14 +73,22 @@ def train(model: Model):
             # Update model parameters
             model.update_params(Consts.LEARNING_RATE)
 
+            # Calculate batch accuracy
+            batch_predictions = np.argmax(predictions, axis=1) + 1
+            correct_predictions += np.sum(batch_predictions == Y_batch)
+            total_samples += Y_batch.shape[0]
 
-        print(f"finished epoch: {epoch} total loss: {train_loss / len(batches)}")
+            # Print batch progress
+            print(f"\tBatch {batch_idx + 1}/{len(batches)} - Loss: {loss:.4f}")
+
+        # Print epoch accuracy and loss
+        epoch_accuracy = correct_predictions / total_samples
+        print(f"Epoch {epoch + 1} completed. Loss: {train_loss / len(batches):.4f}, Accuracy: {epoch_accuracy:.4f}")
+
     return model
-
 
 def loss_fn(predictions, Y_batch):
     return categorical_cross_entropy(predictions, Y_batch)
-
 
 def categorical_cross_entropy(predictions, targets):
     """
@@ -94,7 +109,6 @@ def categorical_cross_entropy(predictions, targets):
     # Compute the loss
     loss = -np.sum(targets * np.log(predictions)) / targets.shape[0]
     return loss
-
 
 def compute_loss_gradient(predictions, targets):
     """
