@@ -20,7 +20,7 @@ def preprocess_data() -> List[Tuple[np.array, np.array]]:
     X, Y = shuffle_data(X, Y)
     X = min_max_norm(X)
     X_train, Y_train = X[:24000], Y[:24000]
-    X_validate, Y_valdiate = X[49000:], Y[49000:]
+    X_validate, Y_valdiate = X[24000:25000], Y[24000:25000]
     # reshape for 32 rows, 32 columns, 3 channels RGB
     X_train = np.reshape(X_train, (24000, 32, 32, 3))
     X_validate = np.reshape(X_validate, (1000, 32, 32, 3))
@@ -44,12 +44,6 @@ def create_mini_batches(X, Y, batch_size, seed=Consts.SEED):
         List of tuples (X_batch, Y_batch)
     """
     n_samples = X.shape[0]
-
-    # Shuffle the data
-    indices = np.arange(n_samples)
-    np.random.shuffle(indices)
-    X = X[indices]
-    Y = Y[indices]
 
     # Create batches
     mini_batches = [
@@ -88,7 +82,7 @@ def train(model: Model):
             model.update_params(Consts.LEARNING_RATE)
 
             # Calculate batch accuracy
-            batch_predictions = np.argmax(predictions, axis=1) + 1
+            batch_predictions = np.argmax(predictions, axis=1)
             correct_predictions += np.sum(batch_predictions == Y_batch)
             total_samples += Y_batch.shape[0]
 

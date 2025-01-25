@@ -157,7 +157,7 @@ def main():
 
     # reshape for 32 rows, 32 columns, 3 channels RGB
     X_validation = np.reshape(X_validation, (1000, 32, 32, 3))
-    Y_pred = np.argmax(trained_model.forward(X_validation), axis=1) + 1
+    Y_pred = np.argmax(trained_model.forward(X_validation), axis=1)
     class_accuracies = []
     for cls in range(1,11):
         cls_indices = Y_validation == cls
