@@ -13,8 +13,12 @@ class Optimizer:
         self.beta1 = beta1
         self.beta2 = beta2
         self.epsilon = epsilon
-        self.m = None  # Momentum for Adam/RMSprop
-        self.v = None  # RMSprop or Adam second moment
+
+        # Separate momentum and second-moment terms for weights and biases
+        self.m_weights = None
+        self.m_biases = None
+        self.v_weights = None
+        self.v_biases = None
 
     def update_params(self, weights, grad_weights, biases=None, grad_biases=None, use_bias=True):
         if self.method == 'SGD':
@@ -25,50 +29,53 @@ class Optimizer:
 
         elif self.method == 'Momentum':
             # SGD with Momentum
-            if self.m is None:
-                self.m = np.zeros_like(weights)
-            self.m = self.beta1 * self.m + self.lr * grad_weights
-            weights -= self.m
+            if self.m_weights is None:
+                self.m_weights = np.zeros_like(weights)
+            self.m_weights = self.beta1 * self.m_weights + (1 - self.beta1) * grad_weights
+            weights -= self.lr * self.m_weights
+
             if use_bias:
-                if self.m is None:
-                    self.m = np.zeros_like(biases)
-                self.m = self.beta1 * self.m + self.lr * grad_biases
-                biases -= self.m
+                if self.m_biases is None:
+                    self.m_biases = np.zeros_like(biases)
+                self.m_biases = self.beta1 * self.m_biases + (1 - self.beta1) * grad_biases
+                biases -= self.lr * self.m_biases
 
         elif self.method == 'RMSprop':
             # RMSprop
-            if self.v is None:
-                self.v = np.zeros_like(weights)
-            self.v = self.beta2 * self.v + (1 - self.beta2) * (grad_weights ** 2)
-            weights -= self.lr * grad_weights / (np.sqrt(self.v) + self.epsilon)
+            if self.v_weights is None:
+                self.v_weights = np.zeros_like(weights)
+            self.v_weights = self.beta2 * self.v_weights + (1 - self.beta2) * (grad_weights ** 2)
+            weights -= self.lr * grad_weights / (np.sqrt(self.v_weights) + self.epsilon)
+
             if use_bias:
-                if self.v is None:
-                    self.v = np.zeros_like(biases)
-                self.v = self.beta2 * self.v + (1 - self.beta2) * (grad_biases ** 2)
-                biases -= self.lr * grad_biases / (np.sqrt(self.v) + self.epsilon)
+                if self.v_biases is None:
+                    self.v_biases = np.zeros_like(biases)
+                self.v_biases = self.beta2 * self.v_biases + (1 - self.beta2) * (grad_biases ** 2)
+                biases -= self.lr * grad_biases / (np.sqrt(self.v_biases) + self.epsilon)
 
         elif self.method == 'Adam':
             # Adam Optimizer
-            if self.m is None:
-                self.m = np.zeros_like(weights)
-            if self.v is None:
-                self.v = np.zeros_like(weights)
+            if self.m_weights is None:
+                self.m_weights = np.zeros_like(weights)
+            if self.v_weights is None:
+                self.v_weights = np.zeros_like(weights)
 
-            self.m = self.beta1 * self.m + (1 - self.beta1) * grad_weights
-            self.v = self.beta2 * self.v + (1 - self.beta2) * (grad_weights ** 2)
-            m_hat = self.m / (1 - self.beta1)  # Bias correction
-            v_hat = self.v / (1 - self.beta2)  # Bias correction
-            weights -= self.lr * m_hat / (np.sqrt(v_hat) + self.epsilon)
+            self.m_weights = self.beta1 * self.m_weights + (1 - self.beta1) * grad_weights
+            self.v_weights = self.beta2 * self.v_weights + (1 - self.beta2) * (grad_weights ** 2)
+            m_hat_weights = self.m_weights / (1 - self.beta1)  # Bias correction
+            v_hat_weights = self.v_weights / (1 - self.beta2)  # Bias correction
+            weights -= self.lr * m_hat_weights / (np.sqrt(v_hat_weights) + self.epsilon)
 
             if use_bias:
-                if self.m is None:
-                    self.m = np.zeros_like(biases)
-                if self.v is None:
-                    self.v = np.zeros_like(biases)
-                self.m = self.beta1 * self.m + (1 - self.beta1) * grad_biases
-                self.v = self.beta2 * self.v + (1 - self.beta2) * (grad_biases ** 2)
-                m_hat = self.m / (1 - self.beta1)
-                v_hat = self.v / (1 - self.beta2)
-                biases -= self.lr * m_hat / (np.sqrt(v_hat) + self.epsilon)
+                if self.m_biases is None:
+                    self.m_biases = np.zeros_like(biases)
+                if self.v_biases is None:
+                    self.v_biases = np.zeros_like(biases)
+
+                self.m_biases = self.beta1 * self.m_biases + (1 - self.beta1) * grad_biases
+                self.v_biases = self.beta2 * self.v_biases + (1 - self.beta2) * (grad_biases ** 2)
+                m_hat_biases = self.m_biases / (1 - self.beta1)
+                v_hat_biases = self.v_biases / (1 - self.beta2)
+                biases -= self.lr * m_hat_biases / (np.sqrt(v_hat_biases) + self.epsilon)
 
         return weights, biases

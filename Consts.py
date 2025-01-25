@@ -1,12 +1,14 @@
+from Optimizer import Optimizer
+
 TRAIN_PATH = "data/train.csv"
 VALIDATION_PATH = "data/validate.csv"
 RESULT_PATH = ""
 RESULT_NAME = ""
 SEED = 42
 TRAIN_NUM = 0
-BATCH_SIZE = 200
-NUM_EPOCHS = 50
-LEARNING_RATE = 0.001
+
+#Optimizer params
+OPTIMIZER_METHOD = Optimizer.METHOD_MOMENTUM
 
 
 #CNN HYPER PARAMETERS

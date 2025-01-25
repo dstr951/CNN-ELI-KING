@@ -1,6 +1,8 @@
 import numpy as np
 
 from Layers.Layer import Layer
+from Optimizer import Optimizer
+import Consts
 
 
 class Conv2D(Layer):
@@ -15,6 +17,7 @@ class Conv2D(Layer):
         # Initialize weights and biases
         self.weights = np.random.randn(kernel_size, kernel_size, input_channels, output_channels) * 0.01
         self.biases = np.zeros(output_channels) if use_bias else None
+        self.optimizer = Optimizer(Consts.OPTIMIZER_METHOD, Consts.LEARNING_RATE)
 
     def original_forward(self, input):
         self.input = np.pad(input, ((0, 0), (self.padding, self.padding),
@@ -178,9 +181,7 @@ class Conv2D(Layer):
         return grad_input
 
     def update_params(self, lr):
-        self.weights -= lr * self.grad_weights
-        if self.use_bias:
-            self.biases -= lr * self.grad_biases
+        self.optimizer.update_params(self.weights, self.grad_weights, self.biases, self.grad_biases, use_bias=True)
 
 # Validation Sample
 if __name__ == "__main__":
