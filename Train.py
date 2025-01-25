@@ -67,7 +67,7 @@ def train(model: Model):
             model.update_params(Consts.LEARNING_RATE)
 
 
-        print(f"finished epoch: {epoch} total loss: {train_loss}")
+        print(f"finished epoch: {epoch} total loss: {train_loss / len(batches)}")
     return model
 
 
