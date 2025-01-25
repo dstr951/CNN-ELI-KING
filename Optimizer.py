@@ -2,6 +2,11 @@ import numpy as np
 
 
 class Optimizer:
+    METHOD_SGD = 'SGD'
+    METHOD_MOMENTUM = 'Momentum'
+    METHOD_RMS_PROP = 'RMSprop'
+    METHOD_ADAM = 'Adam'
+
     def __init__(self, method='SGD', lr=0.01, beta1=0.9, beta2=0.999, epsilon=1e-8):
         self.method = method
         self.lr = lr
