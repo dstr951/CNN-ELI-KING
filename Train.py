@@ -101,7 +101,7 @@ def train(model: Model):
 
         predictions = model.forward(X_validate)
         validation_predictions = np.argmax(predictions, axis=1) + 1
-        correct_predictions += np.sum(validation_predictions == Y_validate)
+        correct_predictions = np.sum(validation_predictions == Y_validate)
         total_samples = Y_validate.shape[0]
         epoch_accuracy = correct_predictions / total_samples
         print(f"Epoch {epoch + 1} completed. Loss: {train_loss / len(batches):.4f}, Accuracy: {epoch_accuracy:.4f}")
