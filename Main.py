@@ -112,8 +112,6 @@ def main():
         BatchNormalization(num_features=Consts.CONV_2D_OUTPUT_CHANNELS),  # Batch Normalization
         ReLU(),
         MaxPooling2D(pool_size=2, stride=2),  # Max Pooling
-
-        Dropout(0.25),
         Conv2D(input_channels=Consts.CONV_2D_OUTPUT_CHANNELS, output_channels=Consts.CONV_2D_OUTPUT_CHANNELS * 2,
                kernel_size=Consts.CONV_2D_KERNEL, stride=Consts.CONV_2D_STRIDE, padding=Consts.CONV_2D_PADDING),
         BatchNormalization(num_features=c_out1*2),  # Batch Normalization
@@ -121,8 +119,6 @@ def main():
         # BatchNormalization(num_features=Consts.CONV_2D_OUTPUT_CHANNELS),  # Batch Normalization
         ReLU(),
         MaxPooling2D(pool_size=2, stride=2),  # Max Pooling
-
-        Dropout(0.25),
         Flatten(),  # Flatten the output
         FullyConnected(input_tuple=(Consts.BATCH_SIZE, flatten_out_dims), output_size=(Consts.BATCH_SIZE, Consts.NUM_NUIRONS)),  # Fully Connected Layer
         FullyConnected(input_tuple=(Consts.BATCH_SIZE,Consts.NUM_NUIRONS), output_size=(Consts.BATCH_SIZE,Consts.NUM_CLASIFICATION_NUIRONS)),  # Output Layer (e.g., 10 classes for classification)
