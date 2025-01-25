@@ -19,11 +19,8 @@ class Optimizer:
         self.m_biases = None
         self.v_weights = None
         self.v_biases = None
-        self.iteration = 0
 
     def update_params(self, weights, grad_weights, biases=None, grad_biases=None, use_bias=True):
-        self.iteration += 1
-
         if self.method == 'SGD':
             # Standard SGD
             weights -= self.lr * grad_weights
@@ -63,13 +60,10 @@ class Optimizer:
             if self.v_weights is None:
                 self.v_weights = np.zeros_like(weights)
 
-            # Update moving averages for weights
             self.m_weights = self.beta1 * self.m_weights + (1 - self.beta1) * grad_weights
             self.v_weights = self.beta2 * self.v_weights + (1 - self.beta2) * (grad_weights ** 2)
-
-            # Bias correction for weights
-            m_hat_weights = self.m_weights / (1 - self.beta1**self.iteration)
-            v_hat_weights = self.v_weights / (1 - self.beta2**self.iteration)
+            m_hat_weights = self.m_weights / (1 - self.beta1)  # Bias correction
+            v_hat_weights = self.v_weights / (1 - self.beta2)  # Bias correction
             weights -= self.lr * m_hat_weights / (np.sqrt(v_hat_weights) + self.epsilon)
 
             if use_bias:
@@ -78,13 +72,10 @@ class Optimizer:
                 if self.v_biases is None:
                     self.v_biases = np.zeros_like(biases)
 
-                # Update moving averages for biases
                 self.m_biases = self.beta1 * self.m_biases + (1 - self.beta1) * grad_biases
                 self.v_biases = self.beta2 * self.v_biases + (1 - self.beta2) * (grad_biases ** 2)
-
-                # Bias correction for biases
-                m_hat_biases = self.m_biases / (1 - self.beta1**self.iteration)
-                v_hat_biases = self.v_biases / (1 - self.beta2**self.iteration)
+                m_hat_biases = self.m_biases / (1 - self.beta1)
+                v_hat_biases = self.v_biases / (1 - self.beta2)
                 biases -= self.lr * m_hat_biases / (np.sqrt(v_hat_biases) + self.epsilon)
 
         return weights, biases
