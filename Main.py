@@ -125,46 +125,6 @@ def main():
         Softmax()
     ])
 
-    # architecture from -
-    # https://www.analyticsvidhya.com/blog/2020/02/learn-image-classification-cnn-convolutional-neural-networks-3-datasets/#h-full-code-for-the-cnn-model
-    # cnn1_out_dims = cnn_dims(Consts.PICTURE_HEIGHT, Consts.PICTURE_WIDTH,
-    #                          Consts.CONV_2D_KERNEL, Consts.CONV_2D_PADDING, Consts.CONV_2D_STRIDE,
-    #                          Consts.CONV_2D_INPUT_CHANNELS, 50)
-    # h1, w1, c1_out = cnn1_out_dims
-    # cnn2_out_dims = cnn_dims(h1, w1,
-    #                          Consts.CONV_2D_KERNEL, Consts.CONV_2D_PADDING, Consts.CONV_2D_STRIDE, c1_out, 75)
-    #
-    # max1_poolling_out_dims = max_pooling_dims(*cnn2_out_dims, Consts.MAX_POOLING_POOL_SIZE, Consts.MAX_POOLING_STRIDE)
-    # h3, w3, c3_out = max1_poolling_out_dims
-    # cnn3_out_dims = cnn_dims(h3, w3, Consts.CONV_2D_KERNEL, Consts.CONV_2D_PADDING, Consts.CONV_2D_STRIDE, c3_out,
-    #                          125)
-    # max2_poolling_out_dims = max_pooling_dims(*cnn3_out_dims, Consts.MAX_POOLING_POOL_SIZE, Consts.MAX_POOLING_STRIDE)
-    #
-    # flatten_out_dims = flatten_dims(*max2_poolling_out_dims)
-    # model = Model([
-    #     Conv2D(input_channels=Consts.CONV_2D_INPUT_CHANNELS,output_channels=50,kernel_size=Consts.CONV_2D_KERNEL,
-    #            stride=Consts.CONV_2D_STRIDE,padding=Consts.CONV_2D_PADDING),
-    #     ReLU(),
-    #     Conv2D(input_channels=50, output_channels=75, kernel_size=Consts.CONV_2D_KERNEL,
-    #            stride=Consts.CONV_2D_STRIDE, padding=Consts.CONV_2D_PADDING),
-    #     ReLU(),
-    #     MaxPooling2D(pool_size=Consts.MAX_POOLING_POOL_SIZE, stride=Consts.MAX_POOLING_STRIDE),
-    #     Dropout(0.25),
-    #     Conv2D(input_channels=75, output_channels=125,kernel_size=Consts.CONV_2D_KERNEL,stride=Consts.CONV_2D_STRIDE,
-    #            padding=Consts.CONV_2D_PADDING),
-    #     ReLU(),
-    #     MaxPooling2D(pool_size=Consts.MAX_POOLING_POOL_SIZE, stride=Consts.MAX_POOLING_STRIDE),
-    #     Dropout(0.25),
-    #     Flatten(),
-    #     FullyConnected(input_tuple=(Consts.BATCH_SIZE,flatten_out_dims),output_size=(Consts.BATCH_SIZE, 500)),
-    #     ReLU(),
-    #     Dropout(0.4),
-    #     FullyConnected(input_tuple=(Consts.BATCH_SIZE, 500), output_size=(Consts.BATCH_SIZE, 250)),
-    #     ReLU(),
-    #     Dropout(0.3),
-    #     FullyConnected(input_tuple=(Consts.BATCH_SIZE,250), output_size=(Consts.BATCH_SIZE, 10)),
-    #     Softmax()
-    # ])
     trained_model, X_validation, Y_validation = Train.train(model)
     # reshape for 32 rows, 32 columns, 3 channels RGB
     X_validation = np.reshape(X_validation, (1000, 32, 32, 3))
@@ -178,10 +138,17 @@ def main():
         class_accuracies.append(accuracy)
     print(class_accuracies)
     Visualizations.generate_visualizations(Y_validation, Y_pred)
+    predict(model)
 
-
-
-
+def predict(model: Model):
+    data = np.genfromtxt (Consts.TEST_PATH, delimiter=',')
+    X_test = data[:,1:]
+    X_test = np.reshape(X_test, (X_test.shape[0], 32, 32, 3))
+    predictions = model.forward(X_test)
+    test_predictions = np.argmax(predictions, axis=1) + 1
+    with open("output.txt",'w') as f:
+        for prediction in test_predictions:
+            f.write(f"{str(prediction)}\n")
 
 if __name__=="__main__":
     main()

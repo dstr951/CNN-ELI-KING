@@ -185,7 +185,7 @@ def train(model: Model):
         if max_epoch_accuracy < epoch_accuracy:
             max_epoch_accuracy = epoch_accuracy
             max_model = copy.deepcopy(model)
-    print("returning model with accuracy: " + max_epoch_accuracy)
+    print(f"returning model with accuracy: {max_epoch_accuracy}")
     return max_model, X_validate, Y_validate
 
 

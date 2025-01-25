@@ -3,6 +3,7 @@ PICTURE_WIDTH = 32
 PICTURE_HEIGHT = 32
 TRAIN_PATH = "data/train.csv"
 VALIDATION_PATH = "data/validate.csv"
+TEST_PATH = "data/test.csv"
 RESULT_PATH = ""
 RESULT_NAME = ""
 SEED = 42
