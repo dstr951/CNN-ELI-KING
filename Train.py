@@ -126,14 +126,18 @@ def show_image_and_channels(matrix):
 def preprocess_data() -> List[Tuple[np.array, np.array]]:
     X, Y = Utils.read_labeled_file(Consts.TRAIN_PATH_CFAR)
     X_validate, Y_valdiate = Utils.read_labeled_file(Consts.VALIDATION_PATH)
-    X, Y = shuffle_data(X, Y)
+    # X, Y = shuffle_data(X, Y)
     X = min_max_norm(X)
-    X_train, Y_train = X[:24000], Y[:24000]
-    X_validate, Y_valdiate = X[24000:25000], Y[24000:25000]
-    # reshape for 32 rows, 32 columns, 3 channels RGB
-    X_train = np.reshape(X_train, (24000, 32, 32, 3))
-    X_validate = np.reshape(X_validate, (1000, 32, 32, 3))
-    # TODO - add minmax normalization to data
+    # Number of images
+    n_samples = X.shape[0]
+
+    # Reshape into (n_samples, 32, 32, 3)
+    X = np.reshape(X, (n_samples, 3, 32, 32))  # Temporary shape for channel-first
+    X = np.transpose(X, (0, 2, 3, 1))  # Convert to channel-last (n_samples, 32, 32, 3)
+    show_image_and_channels(X[2])
+    num_train = 49000
+    X_train, Y_train = X[:num_train], Y[:num_train]
+    X_validate, Y_valdiate = X[num_train:num_train+1000], Y[num_train:num_train+1000]
 
     return create_mini_batches(X_train, Y_train, Consts.BATCH_SIZE), X_validate, Y_valdiate
 
@@ -254,7 +258,6 @@ def categorical_cross_entropy(predictions, targets):
     # Compute the loss
     loss = -np.sum(targets * np.log(predictions)) / targets.shape[0]
     return loss
-
 
 def compute_loss_gradient(predictions, targets):
     """
