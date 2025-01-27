@@ -1,4 +1,9 @@
+import numpy as np
+
 from Consts import *
+from Layers.Dropout import Dropout
+
+
 class Model:
     def __init__(self, layers):
         self.layers = layers
@@ -24,3 +29,11 @@ class Model:
         """
         for layer in self.layers:
             layer.update_params(lr)
+
+    def inference(self, input):
+        for layer in self.layers:
+            if isinstance(layer,Dropout):
+                input = layer.forward(input, training=False)
+            else:
+                input = layer.forward(input)
+        return np.argmax(input, axis=1) + 1

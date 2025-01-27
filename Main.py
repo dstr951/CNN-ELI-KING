@@ -128,7 +128,7 @@ def main():
     trained_model, X_validation, Y_validation = Train.train(model)
     # reshape for 32 rows, 32 columns, 3 channels RGB
     X_validation = np.reshape(X_validation, (1000, 32, 32, 3))
-    Y_pred = np.argmax(trained_model.forward(X_validation), axis=1) + 1
+    Y_pred = trained_model.inference(X_validation)
     class_accuracies = []
     for cls in range(1,11):
         cls_indices = Y_validation == cls
@@ -138,7 +138,7 @@ def main():
         class_accuracies.append(accuracy)
     print(class_accuracies)
     Visualizations.generate_visualizations(Y_validation, Y_pred)
-    predict(model)
+    predict(trained_model)
 
 def predict(model: Model):
     data = np.genfromtxt (Consts.TEST_PATH, delimiter=',')

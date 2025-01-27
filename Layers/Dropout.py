@@ -30,7 +30,7 @@ class Dropout(Layer):
             return input * self.mask
         else:
             # During inference, no dropout is applied; return input unchanged
-            return input
+            return input * (1-self.dropout_rate)
 
     def backward(self, grad_output):
         """
