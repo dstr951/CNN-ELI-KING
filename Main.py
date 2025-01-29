@@ -143,9 +143,8 @@ def main():
 def predict(model: Model):
     data = np.genfromtxt (Consts.TEST_PATH, delimiter=',')
     X_test = data[:,1:]
-    X_test = np.reshape(X_test, (X_test.shape[0], 32, 32, 3))
-    predictions = model.forward(X_test)
-    test_predictions = np.argmax(predictions, axis=1) + 1
+    X_test = Utils.to_img(X_test)
+    test_predictions = model.inference(X_test)
     with open("output.txt",'w') as f:
         for prediction in test_predictions:
             f.write(f"{str(prediction)}\n")

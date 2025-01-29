@@ -65,72 +65,14 @@ def augment_with_rotation_numpy(X, max_angle=5):
     return augmented_X
 
 
-
-
-def show_image_and_channels(matrix):
-    import matplotlib.pyplot as plt
-    """
-    Displays an image represented by a 32x32x3 NumPy matrix, along with its individual RGB channels.
-
-    Args:
-        matrix (np.ndarray): A 32x32x3 NumPy array representing an image.
-    """
-    assert matrix.shape == (32, 32, 3), "Input matrix must have shape (32, 32, 3)."
-
-    # Extract individual channels
-    red_channel = matrix[:, :, 0]   # Red channel
-    green_channel = matrix[:, :, 1] # Green channel
-    blue_channel = matrix[:, :, 2]  # Blue channel
-
-    # Plot the channels and the full image
-    plt.figure(figsize=(10, 10))
-
-    # Red channel
-    plt.subplot(2, 2, 1)
-    plt.title("Red Channel")
-    plt.imshow(red_channel, cmap="Reds")
-    plt.axis("off")
-
-    # Green channel
-    plt.subplot(2, 2, 2)
-    plt.title("Green Channel")
-    plt.imshow(green_channel, cmap="Greens")
-    plt.axis("off")
-
-    # Blue channel
-    plt.subplot(2, 2, 3)
-    plt.title("Blue Channel")
-    plt.imshow(blue_channel, cmap="Blues")
-    plt.axis("off")
-
-    # Full image
-    plt.subplot(2, 2, 4)
-    plt.title("Full Image")
-    plt.imshow(matrix)  # Matplotlib automatically handles RGB
-    plt.axis("off")
-
-    # Show the plots
-    plt.tight_layout()
-    plt.show()
-
-
 def preprocess_data() -> List[Tuple[np.array, np.array]]:
     # Load data
     X, Y = Utils.read_labeled_file(Consts.TRAIN_PATH)
     X_validate, Y_validate = Utils.read_labeled_file(Consts.VALIDATION_PATH)
 
-    # Number of images
-    n_samples = X.shape[0]
-
     # Reshape into (n_samples, 32, 32, 3)
-    X = np.reshape(X, (n_samples, 3, 32, 32))  # Temporary shape for channel-first
-    X = np.transpose(X, (0, 2, 3, 1))          # Convert to channel-last (n_samples, 32, 32, 3)
-    # show_image_and_channels(X[0])              # Visualize the first image
-
-    # Reshape validation set similarly
-    n_validate_samples = X_validate.shape[0]
-    X_validate = np.reshape(X_validate, (n_validate_samples, 3, 32, 32))
-    X_validate = np.transpose(X_validate, (0, 2, 3, 1))
+    X = Utils.to_img(X)
+    X_validate = Utils.to_img(X_validate)
 
     # Combine data for augmentation
     X_combined = X
