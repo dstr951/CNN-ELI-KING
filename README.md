@@ -10,7 +10,7 @@ Run the following command to install all the required packages:
 pip install -r Requirements_windows.txt
 ```
 ### Step 2: running
-Run the following command to run the project:
+Run the following command in your terminal from the project directory, to run the project:
 ```bash
 python Main.py
 ```
